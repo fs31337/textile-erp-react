@@ -1,5 +1,5 @@
 import React from "react";
-import { SuppliersList } from "../../components/SuppliersList";
+import { SuppliersList } from "./components/SuppliersList";
 
 export const Suppliers: React.FC = () => {
   return (

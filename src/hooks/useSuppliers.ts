@@ -1,10 +1,24 @@
 import { useState, useEffect } from "react";
-import { getSuppliers, Supplier } from "../services/Suppliers";
+import {
+  createSupplier,
+  deleteSupplier,
+  getSuppliers,
+  Supplier,
+  updateSupplier,
+} from "../services/Suppliers";
 
 interface UseSuppliersResult {
   suppliers: Supplier[];
   loading: boolean;
   error: Error | null;
+  addSupplier: (
+    supplier: Omit<Supplier, "id" | "created_at" | "updated_at">
+  ) => Promise<void>;
+  editSupplier: (
+    id: number,
+    supplier: Omit<Supplier, "id" | "created_at" | "updated_at">
+  ) => Promise<void>;
+  removeSupplier: (id: number) => Promise<void>;
 }
 
 const useSuppliers = (): UseSuppliersResult => {
@@ -24,8 +38,47 @@ const useSuppliers = (): UseSuppliersResult => {
         setLoading(false);
       });
   }, []);
+  const addSupplier = async (
+    supplier: Omit<Supplier, "id" | "created_at" | "updated_at">
+  ) => {
+    try {
+      const response = await createSupplier(supplier);
+      setSuppliers((prev) => [...prev, response.data]);
+    } catch (err) {
+      setError(err as Error);
+    }
+  };
 
-  return { suppliers, loading, error };
+  const editSupplier = async (
+    id: number,
+    supplier: Omit<Supplier, "id" | "created_at" | "updated_at">
+  ) => {
+    try {
+      const response = await updateSupplier(id, supplier);
+      setSuppliers((prev) =>
+        prev.map((sup) => (sup.id === id ? response.data : sup))
+      );
+    } catch (err) {
+      setError(err as Error);
+    }
+  };
+
+  const removeSupplier = async (id: number) => {
+    try {
+      await deleteSupplier(id);
+      setSuppliers((prev) => prev.filter((sup) => sup.id !== id));
+    } catch (err) {
+      setError(err as Error);
+    }
+  };
+  return {
+    suppliers,
+    loading,
+    error,
+    addSupplier,
+    editSupplier,
+    removeSupplier,
+  };
 };
 
 export default useSuppliers;
