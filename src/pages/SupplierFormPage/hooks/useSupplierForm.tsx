@@ -6,12 +6,14 @@ import {
   Supplier,
   updateSupplier,
 } from "../../../services/Suppliers";
+import { SelectChangeEvent } from "@mui/material";
 
 interface UseSupplierFormResult {
   supplierData: Omit<Supplier, "id" | "created_at" | "updated_at">;
   loading: boolean;
   error: string | null;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSelectChange: (e: SelectChangeEvent<number>) => void;
   handleSave: () => void;
   isViewMode: boolean;
 }
@@ -28,9 +30,9 @@ export const useSupplierForm = (
     address: "",
     phone: "",
     email: "",
-    category_id: undefined,
-    sector_id: undefined,
-    supplier_type_id: undefined,
+    category_id: NaN,
+    sector_id: NaN,
+    supplier_type_id: NaN,
     website: "",
   });
   const [loading, setLoading] = useState<boolean>(
@@ -55,7 +57,18 @@ export const useSupplierForm = (
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSupplierData((prevData) => ({ ...prevData, [name]: value }));
+    setSupplierData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<number>) => {
+    const { name, value } = e.target;
+    setSupplierData((prevData) => ({
+      ...prevData,
+      [name]: Number(value),
+    }));
   };
 
   const handleSave = () => {
@@ -75,6 +88,7 @@ export const useSupplierForm = (
     loading,
     error,
     handleInputChange,
+    handleSelectChange,
     handleSave,
     isViewMode: mode === "view",
   };

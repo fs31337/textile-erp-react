@@ -10,15 +10,15 @@ export const SuppliersList: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCreateClick = () => {
-    navigate("/suppliers/new");
+    navigate("/proveedores/new");
   };
 
   const handleEdit = (supplier: Supplier) => {
-    navigate(`/suppliers/edit/${supplier.id}`);
+    navigate(`/proveedores/edit/${supplier.id}`);
   };
 
   const handleViewDetails = (supplier: Supplier) => {
-    navigate(`/suppliers/${supplier.id}`);
+    navigate(`/proveedores/${supplier.id}`);
   };
 
   const handleDelete = (supplier: Supplier) => {
