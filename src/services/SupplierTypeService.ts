@@ -11,18 +11,18 @@ export interface SupplierType {
 }
 
 export const getSupplierTypes = () => {
-  return axios.get<SupplierType[]>(`${API_BASE_URL}/suppliers/type`);
+  return axios.get<SupplierType[]>(`${API_BASE_URL}/suppliers-type`);
 };
 
 export const getSupplierTypeById = (id: number) => {
-  return axios.get<SupplierType>(`${API_BASE_URL}/suppliers/type/${id}`);
+  return axios.get<SupplierType>(`${API_BASE_URL}/suppliers-type/${id}`);
 };
 
 export const createSupplierType = (
   supplierType: Omit<SupplierType, "id" | "created_at" | "updated_at">
 ) => {
   return axios.post<SupplierType>(
-    `${API_BASE_URL}/suppliers/type`,
+    `${API_BASE_URL}/suppliers-type`,
     supplierType
   );
 };
@@ -32,11 +32,11 @@ export const updateSupplierType = (
   supplierType: Omit<SupplierType, "id" | "created_at" | "updated_at">
 ) => {
   return axios.put<SupplierType>(
-    `${API_BASE_URL}/suppliers/type/${id}`,
+    `${API_BASE_URL}/suppliers-type/${id}`,
     supplierType
   );
 };
 
 export const deleteSupplierType = (id: number) => {
-  return axios.delete(`${API_BASE_URL}/suppliers/type/${id}`);
+  return axios.delete(`${API_BASE_URL}/suppliers-type/${id}`);
 };
