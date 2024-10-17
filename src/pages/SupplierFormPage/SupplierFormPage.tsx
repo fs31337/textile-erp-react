@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import {
   TextField,
   Button,
@@ -10,51 +10,41 @@ import {
   FormControl,
 } from "@mui/material";
 import { useSupplierForm } from "./hooks/useSupplierForm";
-import {
-  getSupplierTypes,
-  SupplierType,
-} from "../../services/SupplierTypeService";
-import { getSectors, Sector } from "../../services/SectorService";
-import { Category, getCategories } from "../../services/CategoryService";
+import { SupplierData, useFormValidation } from "./hooks/useFormValidation";
+import { useFetchSupplierFormData } from "./hooks/useFetchSupplierFormData";
 
 interface SupplierFormPageProps {
   mode: "create" | "edit" | "view";
 }
 
 export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
+  const { formErrors, validateForm } = useFormValidation();
+  const {
+    supplierTypes,
+    sectors,
+    categories,
+    loadingData,
+    error: fetchDataError,
+  } = useFetchSupplierFormData();
+
   const {
     supplierData,
     loading,
-    error,
+    error: formError,
     handleInputChange,
     handleSelectChange,
     handleSave,
     isViewMode,
   } = useSupplierForm(mode);
-
-  const [supplierTypes, setSupplierTypes] = useState<SupplierType[]>([]);
-  const [sectors, setSectors] = useState<Sector[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  const fetchData = useCallback(async () => {
-    try {
-      const [supplierTypesData, sectorsData, categoriesData] =
-        await Promise.all([getSupplierTypes(), getSectors(), getCategories()]);
-      console.log(supplierTypesData, sectorsData, categoriesData);
-      setSupplierTypes(supplierTypesData);
-      setSectors(sectorsData);
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error("Error fetching data", error);
+  const handleSubmit = () => {
+    if (validateForm(supplierData as SupplierData)) {
+      handleSave();
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (loading || loadingData) return <CircularProgress />;
+  if (formError || fetchDataError)
+    return <Typography color="error">{formError || fetchDataError}</Typography>;
 
   return (
     <div className="mt-6 max-w-lg mx-auto flex flex-col space-y-4 p-4 bg-white shadow-md rounded-md">
@@ -74,9 +64,11 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
         onChange={handleInputChange}
         disabled={isViewMode}
         fullWidth
+        error={!!formErrors.name}
+        helperText={formErrors.name}
       />
 
-      <FormControl fullWidth margin="normal">
+      <FormControl fullWidth margin="normal" error={!!formErrors.category_id}>
         <InputLabel>Categoría</InputLabel>
         <Select
           name="category_id"
@@ -90,9 +82,12 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
             </MenuItem>
           ))}
         </Select>
+        {formErrors.category_id && (
+          <Typography color="error">{formErrors.category_id}</Typography>
+        )}
       </FormControl>
 
-      <FormControl fullWidth margin="normal">
+      <FormControl fullWidth margin="normal" error={!!formErrors.sector_id}>
         <InputLabel>Sector</InputLabel>
         <Select
           name="sector_id"
@@ -106,9 +101,16 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
             </MenuItem>
           ))}
         </Select>
+        {formErrors.sector_id && (
+          <Typography color="error">{formErrors.sector_id}</Typography>
+        )}
       </FormControl>
 
-      <FormControl fullWidth margin="normal">
+      <FormControl
+        fullWidth
+        margin="normal"
+        error={!!formErrors.supplier_type_id}
+      >
         <InputLabel>Tipo de Proveedor</InputLabel>
         <Select
           name="supplier_type_id"
@@ -122,6 +124,9 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
             </MenuItem>
           ))}
         </Select>
+        {formErrors.supplier_type_id && (
+          <Typography color="error">{formErrors.supplier_type_id}</Typography>
+        )}
       </FormControl>
 
       <TextField
@@ -132,6 +137,8 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
         onChange={handleInputChange}
         disabled={isViewMode}
         fullWidth
+        error={!!formErrors.address}
+        helperText={formErrors.address}
       />
       <TextField
         label="Teléfono"
@@ -141,6 +148,8 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
         onChange={handleInputChange}
         disabled={isViewMode}
         fullWidth
+        error={!!formErrors.phone}
+        helperText={formErrors.phone}
       />
       <TextField
         label="Email"
@@ -150,6 +159,8 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
         onChange={handleInputChange}
         disabled={isViewMode}
         fullWidth
+        error={!!formErrors.email}
+        helperText={formErrors.email}
       />
       <TextField
         label="Website"
@@ -159,6 +170,9 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
         onChange={handleInputChange}
         disabled={isViewMode}
         fullWidth
+        type="url"
+        error={!!formErrors.website}
+        helperText={formErrors.website}
       />
 
       {!isViewMode && (
@@ -166,7 +180,7 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleSave}
+            onClick={handleSubmit}
             className="w-1/2 bg-blue-500 hover:bg-blue-600"
           >
             {mode === "create" ? "Guardar" : "Guardar Cambios"}
