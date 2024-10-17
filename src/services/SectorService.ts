@@ -5,32 +5,38 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL as string;
 export interface Sector {
   id: number;
   name: string;
-  description?: string;
   created_at?: string;
   updated_at?: string;
 }
 
-export const getSectors = () => {
-  return axios.get<Sector[]>(`${API_BASE_URL}/sector`);
+export const getSectors = async (): Promise<Sector[]> => {
+  const response = await axios.get<Sector[]>(`${API_BASE_URL}/sector`);
+  return response.data;
 };
 
-export const getSectorById = (id: number) => {
-  return axios.get<Sector>(`${API_BASE_URL}/sector/${id}`);
+export const getSectorById = async (id: number): Promise<Sector> => {
+  const response = await axios.get<Sector>(`${API_BASE_URL}/sector/${id}`);
+  return response.data;
 };
 
-export const createSector = (
+export const createSector = async (
   sector: Omit<Sector, "id" | "created_at" | "updated_at">
-) => {
-  return axios.post<Sector>(`${API_BASE_URL}/sector`, sector);
+): Promise<Sector> => {
+  const response = await axios.post<Sector>(`${API_BASE_URL}/sector`, sector);
+  return response.data;
 };
 
-export const updateSector = (
+export const updateSector = async (
   id: number,
   sector: Omit<Sector, "id" | "created_at" | "updated_at">
-) => {
-  return axios.put<Sector>(`${API_BASE_URL}/sector/${id}`, sector);
+): Promise<Sector> => {
+  const response = await axios.put<Sector>(
+    `${API_BASE_URL}/sector/${id}`,
+    sector
+  );
+  return response.data;
 };
 
-export const deleteSector = (id: number) => {
-  return axios.delete(`${API_BASE_URL}/sector/${id}`);
+export const deleteSector = async (id: number): Promise<void> => {
+  await axios.delete(`${API_BASE_URL}/sector/${id}`);
 };
