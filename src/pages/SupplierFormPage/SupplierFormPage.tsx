@@ -1,3 +1,4 @@
+// SupplierFormPage.tsx
 import React from "react";
 import {
   TextField,
@@ -12,6 +13,7 @@ import {
 import { useSupplierForm } from "./hooks/useSupplierForm";
 import { SupplierData, useFormValidation } from "./hooks/useFormValidation";
 import { useFetchSupplierFormData } from "./hooks/useFetchSupplierFormData";
+import { useNotification } from "../../context/NotificationProvider/NotificationProvider";
 
 interface SupplierFormPageProps {
   mode: "create" | "edit" | "view";
@@ -36,9 +38,17 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
     handleSave,
     isViewMode,
   } = useSupplierForm(mode);
-  const handleSubmit = () => {
+
+  const { showNotification } = useNotification();
+
+  const handleSubmit = async () => {
     if (validateForm(supplierData as SupplierData)) {
-      handleSave();
+      try {
+        await handleSave();
+        showNotification("Proveedor creado con éxito.", "success");
+      } catch {
+        showNotification("Error al crear el proveedor.", "error");
+      }
     }
   };
 
