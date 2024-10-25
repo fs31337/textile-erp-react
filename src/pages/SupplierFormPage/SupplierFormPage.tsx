@@ -1,4 +1,3 @@
-// SupplierFormPage.tsx
 import React from "react";
 import {
   TextField,
@@ -14,12 +13,14 @@ import { useSupplierForm } from "./hooks/useSupplierForm";
 import { SupplierData, useFormValidation } from "./hooks/useFormValidation";
 import { useFetchSupplierFormData } from "./hooks/useFetchSupplierFormData";
 import { useNotification } from "../../context/NotificationProvider/NotificationProvider";
+import { useNavigate } from "react-router-dom";
 
 interface SupplierFormPageProps {
   mode: "create" | "edit" | "view";
 }
 
 export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
+  const navigate = useNavigate();
   const { formErrors, validateForm } = useFormValidation();
   const {
     supplierTypes,
@@ -49,6 +50,13 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
       } catch {
         showNotification("Error al crear el proveedor.", "error");
       }
+    }
+  };
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate("/proveedores");
     }
   };
 

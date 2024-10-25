@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import useSuppliers from "../../../../hooks/useSuppliers";
+import { useSuppliers } from "../../hooks/useSuppliers";
 import { Supplier } from "../../../../services/Suppliers";
 import { SearchBar } from "../../../../components/SearchBar";
 import { PaginatedTable } from "../../../../components/PaginatedTable";
