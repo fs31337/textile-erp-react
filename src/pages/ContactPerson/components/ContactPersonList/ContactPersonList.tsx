@@ -13,10 +13,11 @@ export const ContactPersonList: React.FC = () => {
     useContactPerson();
   const columns = [
     { label: "ID", accessor: "id" as keyof ContactPerson },
+    { label: "ID Proveedor", accessor: "supplier_id" as keyof ContactPerson },
     { label: "Nombre", accessor: "name" as keyof ContactPerson },
-    { label: "Dirección", accessor: "address" as keyof ContactPerson },
     { label: "Teléfono", accessor: "phone" as keyof ContactPerson },
     { label: "Email", accessor: "email" as keyof ContactPerson },
+    { label: "Posición", accessor: "position" as keyof ContactPerson },
   ];
 
   const {
@@ -33,15 +34,15 @@ export const ContactPersonList: React.FC = () => {
   });
 
   const handleCreateClick = () => {
-    navigate("/contact_persons/new");
+    navigate("/contactos/new");
   };
 
   const handleEdit = (contactPerson: ContactPerson) => {
-    navigate(`/contact_person/edit/${contactPerson.id}`);
+    navigate(`/contactos/edit/${contactPerson.id}`);
   };
 
   const handleViewDetails = (contactPerson: ContactPerson) => {
-    navigate(`/contact_persons/${contactPerson.id}`);
+    navigate(`/contactos/${contactPerson.id}`);
   };
 
   const handleDelete = (contactPerson: ContactPerson) => {
@@ -51,7 +52,7 @@ export const ContactPersonList: React.FC = () => {
   return (
     <div>
       <Button variant="contained" color="primary" onClick={handleCreateClick}>
-        Crear Proveedor
+        Crear Contacto
       </Button>
 
       <SearchBar

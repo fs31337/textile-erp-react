@@ -1,108 +1,104 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate, useParams } from "react-router-dom";
+import { useFetchSupplierFormData } from "./useFetchSupplierFormData";
+
+import { SupplierData } from "../types";
+import { useNotification } from "../../../context/NotificationProvider/NotificationProvider";
 import {
   createSupplier,
   getSupplierById,
-  Supplier,
   updateSupplier,
 } from "../../../services/Suppliers";
-import { SelectChangeEvent } from "@mui/material";
-import { useNotification } from "../../../context/NotificationProvider/NotificationProvider";
+import { supplierSchema } from "../validation/supplierSchema";
 
-interface UseSupplierFormResult {
-  supplierData: Omit<Supplier, "id" | "created_at" | "updated_at">;
-  loading: boolean;
-  error: string | null;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSelectChange: (e: SelectChangeEvent<number>) => void;
-  handleSave: () => void;
-  isViewMode: boolean;
-}
-
-export const useSupplierForm = (
-  mode: "create" | "edit" | "view"
-): UseSupplierFormResult => {
-  const { id } = useParams<{ id: string }>();
+export const useSupplierForm = (mode: "create" | "edit" | "view") => {
   const navigate = useNavigate();
-  const [supplierData, setSupplierData] = useState<
-    Omit<Supplier, "id" | "created_at" | "updated_at">
-  >({
-    name: "",
-    address: "",
-    phone: "",
-    email: "",
-    category_id: NaN,
-    sector_id: NaN,
-    supplier_type_id: NaN,
-    website: "",
-  });
-  const [loading, setLoading] = useState<boolean>(
+  const { showNotification } = useNotification();
+  const { supplierTypes, sectors, categories, loadingData, error } =
+    useFetchSupplierFormData();
+  const [isLoading, setIsLoading] = useState<boolean>(
     mode === "edit" || mode === "view"
   );
-  const [error, setError] = useState<string | null>(null);
-  const { showNotification } = useNotification();
+  const { id } = useParams<{ id: string }>();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isDirty },
+    reset,
+  } = useForm<SupplierData>({
+    resolver: yupResolver(supplierSchema),
+    defaultValues: {
+      name: "",
+      address: "",
+      phone: "",
+      email: "",
+      category_id: NaN,
+      sector_id: NaN,
+      supplier_type_id: NaN,
+      website: undefined,
+    },
+  });
+
   useEffect(() => {
     if ((mode === "edit" || mode === "view") && id) {
-      setLoading(true);
+      setIsLoading(true);
       getSupplierById(Number(id))
         .then((response) => {
-          setSupplierData(response.data);
-          setLoading(false);
+          reset({
+            ...response.data,
+            website: response.data.website || undefined,
+          });
+          setIsLoading(false);
         })
-        .catch((err) => {
-          setError("Error al cargar el proveedor");
-          setLoading(false);
+        .catch(() => {
+          showNotification("Error al cargar el proveedor.", "error");
+          setIsLoading(false);
         });
+    } else {
+      setIsLoading(false);
     }
-  }, [id, mode]);
+  }, [id, mode, reset, showNotification]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSupplierData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectChange = (e: SelectChangeEvent<number>) => {
-    const { name, value } = e.target;
-    setSupplierData((prevData) => ({
-      ...prevData,
-      [name]: Number(value),
-    }));
-  };
-
-  const handleSave = () => {
+  const onSubmit = (data: SupplierData) => {
     if (mode === "create") {
-      createSupplier(supplierData)
+      createSupplier(data)
         .then(() => {
           showNotification("Proveedor creado con éxito.", "success");
           navigate("/proveedores");
         })
         .catch(() => {
-          setError("Error al crear el proveedor");
           showNotification("Error al crear el proveedor.", "error");
         });
     } else if (mode === "edit" && id) {
-      updateSupplier(Number(id), supplierData)
+      if (!isDirty) {
+        showNotification("No hay cambios para guardar.", "info");
+        return;
+      }
+      updateSupplier(Number(id), data)
         .then(() => {
           showNotification("Proveedor modificado con éxito.", "success");
           navigate("/proveedores");
         })
         .catch(() => {
-          setError("Error al actualizar el proveedor");
           showNotification("Error al modificar el proveedor.", "error");
         });
     }
   };
 
   return {
-    supplierData,
-    loading,
+    control,
+    handleSubmit,
+    errors,
+    isLoading,
+    loadingData,
     error,
-    handleInputChange,
-    handleSelectChange,
-    handleSave,
+    categories,
+    sectors,
+    supplierTypes,
     isViewMode: mode === "view",
+    onSubmit,
   };
 };

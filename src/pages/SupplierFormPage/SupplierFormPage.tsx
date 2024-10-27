@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   TextField,
   Button,
@@ -9,140 +9,28 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useNavigate, useParams } from "react-router-dom";
-import { useNotification } from "../../context/NotificationProvider/NotificationProvider";
-import { useFetchSupplierFormData } from "./hooks/useFetchSupplierFormData";
-import {
-  createSupplier,
-  getSupplierById,
-  updateSupplier,
-} from "../../services/Suppliers";
 
-interface SupplierData {
-  name: string;
-  address: string;
-  phone: string;
-  email: string;
-  category_id: number;
-  sector_id: number;
-  supplier_type_id: number;
-  website?: string;
-}
+import { useNavigate } from "react-router-dom";
 
-interface SupplierFormPageProps {
-  mode: "create" | "edit" | "view";
-}
-
-// Esquema de validación con Yup
-const supplierSchema = yup.object().shape({
-  name: yup.string().required("El nombre es obligatorio."),
-  address: yup.string().required("La dirección es obligatoria."),
-  phone: yup.string().required("El teléfono es obligatorio."),
-  email: yup
-    .string()
-    .email("Ingresa un email válido.")
-    .required("El email es obligatorio."),
-  category_id: yup
-    .number()
-    .typeError("Selecciona una categoría.")
-    .required("Selecciona una categoría."),
-  sector_id: yup
-    .number()
-    .typeError("Selecciona un sector.")
-    .required("Selecciona un sector."),
-  supplier_type_id: yup
-    .number()
-    .typeError("Selecciona un tipo de proveedor.")
-    .required("Selecciona un tipo de proveedor."),
-  website: yup.string().url("Ingresa una URL válida.").optional(),
-});
+import { SupplierFormPageProps } from "./types";
+import { useSupplierForm } from "./hooks/useSupplierForm";
+import { Controller } from "react-hook-form";
 
 export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
   const navigate = useNavigate();
-  const { showNotification } = useNotification();
-  const {
-    supplierTypes,
-    sectors,
-    categories,
-    loadingData,
-    error: fetchDataError,
-  } = useFetchSupplierFormData();
-  const [isLoading, setIsLoading] = useState<boolean>(
-    mode === "edit" || mode === "view"
-  );
-
   const {
     control,
     handleSubmit,
-    formState: { errors, isDirty },
-    reset,
-  } = useForm<SupplierData>({
-    resolver: yupResolver(supplierSchema),
-    defaultValues: {
-      name: "",
-      address: "",
-      phone: "",
-      email: "",
-      category_id: NaN,
-      sector_id: NaN,
-      supplier_type_id: NaN,
-      website: undefined,
-    },
-  });
-
-  const isViewMode = mode === "view";
-  const { id } = useParams<{ id: string }>();
-
-  // Cargar datos en modo de edición o visualización
-  useEffect(() => {
-    if ((mode === "edit" || mode === "view") && id) {
-      setIsLoading(true);
-      getSupplierById(Number(id))
-        .then((response) => {
-          reset({
-            ...response.data,
-            website: response.data.website || undefined,
-          });
-          setIsLoading(false);
-        })
-        .catch(() => {
-          showNotification("Error al cargar el proveedor.", "error");
-          setIsLoading(false);
-        });
-    } else {
-      setIsLoading(false);
-    }
-  }, [id, mode, reset, showNotification]);
-
-  // Maneja el envío del formulario
-  const onSubmit = (data: SupplierData) => {
-    if (mode === "create") {
-      createSupplier(data)
-        .then(() => {
-          showNotification("Proveedor creado con éxito.", "success");
-          navigate("/proveedores");
-        })
-        .catch(() => {
-          showNotification("Error al crear el proveedor.", "error");
-        });
-    } else if (mode === "edit" && id) {
-      if (!isDirty) {
-        showNotification("No hay cambios para guardar.", "info");
-        return;
-      }
-      updateSupplier(Number(id), data)
-        .then(() => {
-          showNotification("Proveedor modificado con éxito.", "success");
-          navigate("/proveedores");
-        })
-        .catch(() => {
-          showNotification("Error al modificar el proveedor.", "error");
-        });
-    }
-  };
+    errors,
+    isLoading,
+    loadingData,
+    error,
+    categories,
+    sectors,
+    supplierTypes,
+    isViewMode,
+    onSubmit,
+  } = useSupplierForm(mode);
 
   if (isLoading || loadingData) {
     return (
@@ -152,8 +40,8 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
     );
   }
 
-  if (fetchDataError) {
-    return <Typography color="error">{fetchDataError}</Typography>;
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
   }
 
   return (

@@ -1,18 +1,16 @@
-import { RouteObject } from "react-router-dom";
 import { Home } from "../pages/Home";
 import { Settings } from "../pages/Settings";
-import contactPersonRoutes from "./ContactPerson";
-import { SupplierRoutes } from "./SuppliersRoutes";
+import { contactPersonRoutes } from "./ContactPerson";
+import { supplierRoutes } from "./SupplierRoutes";
+import { RouteType } from "../types/routes";
 
-const baseRoutes: RouteObject[] = [
+const baseRoutes: RouteType[] = [
   { path: "/", element: <Home /> },
   { path: "/settings", element: <Settings /> },
 ];
 
-const appRoutes: RouteObject[] = [
+export const appRoutes: RouteType[] = [
   ...baseRoutes,
-  ...SupplierRoutes,
+  ...supplierRoutes,
   ...contactPersonRoutes,
 ];
-
-export default appRoutes;

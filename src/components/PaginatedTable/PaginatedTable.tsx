@@ -57,7 +57,7 @@ export const PaginatedTable = <T,>({
         <TableHead>
           <TableRow>
             {columns.map((column) => (
-              <TableCell key={column.label} align="left">
+              <TableCell key={column.label} align="center">
                 {column.label}
               </TableCell>
             ))}
@@ -68,7 +68,7 @@ export const PaginatedTable = <T,>({
           {data.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               {columns.map((column) => (
-                <TableCell key={column.label} align="left">
+                <TableCell key={column.label} align="center">
                   {row[column.accessor] as React.ReactNode}
                 </TableCell>
               ))}
