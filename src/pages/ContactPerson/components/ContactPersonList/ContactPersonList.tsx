@@ -1,22 +1,22 @@
 import React from "react";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import { useSuppliers } from "../../hooks/useSuppliers";
-import { Supplier } from "../../../../services/Suppliers";
 import { SearchBar } from "../../../../components/SearchBar";
 import { PaginatedTable } from "../../../../components/PaginatedTable";
 import { useTableControls } from "../../../../hooks/useTableControls";
+import { ContactPerson } from "../../../../services/ContactPerson";
+import { useContactPerson } from "../../hooks/useContactPerson";
 
-export const SuppliersList: React.FC = () => {
-  const { suppliers, loading, error, removeSupplier } = useSuppliers();
+export const ContactPersonList: React.FC = () => {
   const navigate = useNavigate();
-
+  const { contactPerson, loading, error, removeContactPerson } =
+    useContactPerson();
   const columns = [
-    { label: "ID", accessor: "id" as keyof Supplier },
-    { label: "Nombre", accessor: "name" as keyof Supplier },
-    { label: "Dirección", accessor: "address" as keyof Supplier },
-    { label: "Teléfono", accessor: "phone" as keyof Supplier },
-    { label: "Email", accessor: "email" as keyof Supplier },
+    { label: "ID", accessor: "id" as keyof ContactPerson },
+    { label: "Nombre", accessor: "name" as keyof ContactPerson },
+    { label: "Dirección", accessor: "address" as keyof ContactPerson },
+    { label: "Teléfono", accessor: "phone" as keyof ContactPerson },
+    { label: "Email", accessor: "email" as keyof ContactPerson },
   ];
 
   const {
@@ -28,24 +28,24 @@ export const SuppliersList: React.FC = () => {
     handleChangePage,
     handleChangeRowsPerPage,
     filteredCount,
-  } = useTableControls(suppliers, {
+  } = useTableControls(contactPerson, {
     columns: columns.map((col) => col.accessor),
   });
 
   const handleCreateClick = () => {
-    navigate("/proveedores/new");
+    navigate("/contact_persons/new");
   };
 
-  const handleEdit = (supplier: Supplier) => {
-    navigate(`/proveedores/edit/${supplier.id}`);
+  const handleEdit = (contactPerson: ContactPerson) => {
+    navigate(`/contact_person/edit/${contactPerson.id}`);
   };
 
-  const handleViewDetails = (supplier: Supplier) => {
-    navigate(`/proveedores/${supplier.id}`);
+  const handleViewDetails = (contactPerson: ContactPerson) => {
+    navigate(`/contact_persons/${contactPerson.id}`);
   };
 
-  const handleDelete = (supplier: Supplier) => {
-    removeSupplier(supplier.id);
+  const handleDelete = (contactPerson: ContactPerson) => {
+    removeContactPerson(contactPerson.id);
   };
 
   return (
@@ -62,7 +62,7 @@ export const SuppliersList: React.FC = () => {
         }}
       />
 
-      <PaginatedTable<Supplier>
+      <PaginatedTable<ContactPerson>
         columns={columns}
         data={paginatedData}
         totalItems={filteredCount}

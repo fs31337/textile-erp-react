@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -9,19 +9,60 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
-import { useSupplierForm } from "./hooks/useSupplierForm";
-import { SupplierData, useFormValidation } from "./hooks/useFormValidation";
-import { useFetchSupplierFormData } from "./hooks/useFetchSupplierFormData";
+import { useForm, Controller } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useNavigate, useParams } from "react-router-dom";
 import { useNotification } from "../../context/NotificationProvider/NotificationProvider";
-import { useNavigate } from "react-router-dom";
+import { useFetchSupplierFormData } from "./hooks/useFetchSupplierFormData";
+import {
+  createSupplier,
+  getSupplierById,
+  updateSupplier,
+} from "../../services/Suppliers";
+
+interface SupplierData {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  category_id: number;
+  sector_id: number;
+  supplier_type_id: number;
+  website?: string;
+}
 
 interface SupplierFormPageProps {
   mode: "create" | "edit" | "view";
 }
 
+// Esquema de validación con Yup
+const supplierSchema = yup.object().shape({
+  name: yup.string().required("El nombre es obligatorio."),
+  address: yup.string().required("La dirección es obligatoria."),
+  phone: yup.string().required("El teléfono es obligatorio."),
+  email: yup
+    .string()
+    .email("Ingresa un email válido.")
+    .required("El email es obligatorio."),
+  category_id: yup
+    .number()
+    .typeError("Selecciona una categoría.")
+    .required("Selecciona una categoría."),
+  sector_id: yup
+    .number()
+    .typeError("Selecciona un sector.")
+    .required("Selecciona un sector."),
+  supplier_type_id: yup
+    .number()
+    .typeError("Selecciona un tipo de proveedor.")
+    .required("Selecciona un tipo de proveedor."),
+  website: yup.string().url("Ingresa una URL válida.").optional(),
+});
+
 export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
   const navigate = useNavigate();
-  const { formErrors, validateForm } = useFormValidation();
+  const { showNotification } = useNotification();
   const {
     supplierTypes,
     sectors,
@@ -29,40 +70,91 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
     loadingData,
     error: fetchDataError,
   } = useFetchSupplierFormData();
+  const [isLoading, setIsLoading] = useState<boolean>(
+    mode === "edit" || mode === "view"
+  );
 
   const {
-    supplierData,
-    loading,
-    error: formError,
-    handleInputChange,
-    handleSelectChange,
-    handleSave,
-    isViewMode,
-  } = useSupplierForm(mode);
+    control,
+    handleSubmit,
+    formState: { errors, isDirty },
+    reset,
+  } = useForm<SupplierData>({
+    resolver: yupResolver(supplierSchema),
+    defaultValues: {
+      name: "",
+      address: "",
+      phone: "",
+      email: "",
+      category_id: NaN,
+      sector_id: NaN,
+      supplier_type_id: NaN,
+      website: undefined,
+    },
+  });
 
-  const { showNotification } = useNotification();
+  const isViewMode = mode === "view";
+  const { id } = useParams<{ id: string }>();
 
-  const handleSubmit = async () => {
-    if (validateForm(supplierData as SupplierData)) {
-      try {
-        await handleSave();
-        showNotification("Proveedor creado con éxito.", "success");
-      } catch {
-        showNotification("Error al crear el proveedor.", "error");
-      }
-    }
-  };
-  const handleBack = () => {
-    if (window.history.length > 2) {
-      navigate(-1);
+  // Cargar datos en modo de edición o visualización
+  useEffect(() => {
+    if ((mode === "edit" || mode === "view") && id) {
+      setIsLoading(true);
+      getSupplierById(Number(id))
+        .then((response) => {
+          reset({
+            ...response.data,
+            website: response.data.website || undefined,
+          });
+          setIsLoading(false);
+        })
+        .catch(() => {
+          showNotification("Error al cargar el proveedor.", "error");
+          setIsLoading(false);
+        });
     } else {
-      navigate("/proveedores");
+      setIsLoading(false);
+    }
+  }, [id, mode, reset, showNotification]);
+
+  // Maneja el envío del formulario
+  const onSubmit = (data: SupplierData) => {
+    if (mode === "create") {
+      createSupplier(data)
+        .then(() => {
+          showNotification("Proveedor creado con éxito.", "success");
+          navigate("/proveedores");
+        })
+        .catch(() => {
+          showNotification("Error al crear el proveedor.", "error");
+        });
+    } else if (mode === "edit" && id) {
+      if (!isDirty) {
+        showNotification("No hay cambios para guardar.", "info");
+        return;
+      }
+      updateSupplier(Number(id), data)
+        .then(() => {
+          showNotification("Proveedor modificado con éxito.", "success");
+          navigate("/proveedores");
+        })
+        .catch(() => {
+          showNotification("Error al modificar el proveedor.", "error");
+        });
     }
   };
 
-  if (loading || loadingData) return <CircularProgress />;
-  if (formError || fetchDataError)
-    return <Typography color="error">{formError || fetchDataError}</Typography>;
+  if (isLoading || loadingData) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (fetchDataError) {
+    return <Typography color="error">{fetchDataError}</Typography>;
+  }
 
   return (
     <div className="mt-6 max-w-lg mx-auto flex flex-col space-y-4 p-4 bg-white shadow-md rounded-md">
@@ -74,137 +166,193 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
           : "Detalles del Proveedor"}
       </Typography>
 
-      <TextField
-        label="Nombre"
-        name="name"
-        margin="normal"
-        value={supplierData.name}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-        error={!!formErrors.name}
-        helperText={formErrors.name}
-      />
+      <form onSubmit={handleSubmit(onSubmit)} className="form-container">
+        <Controller
+          name="name"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Nombre"
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
 
-      <FormControl fullWidth margin="normal" error={!!formErrors.category_id}>
-        <InputLabel>Categoría</InputLabel>
-        <Select
-          name="category_id"
-          value={supplierData.category_id || ""}
-          onChange={handleSelectChange}
-          disabled={isViewMode}
+        <FormControl fullWidth margin="normal" error={!!errors.category_id}>
+          <InputLabel>Categoría</InputLabel>
+          <Controller
+            name="category_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                disabled={isViewMode}
+                value={field.value || ""}
+                onChange={field.onChange}
+              >
+                <MenuItem value="">
+                  <em>Selecciona una categoría</em>
+                </MenuItem>
+                {categories.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
+          />
+          <Typography color="error">{errors.category_id?.message}</Typography>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal" error={!!errors.sector_id}>
+          <InputLabel>Sector</InputLabel>
+          <Controller
+            name="sector_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                disabled={isViewMode}
+                value={field.value || ""}
+                onChange={field.onChange}
+              >
+                <MenuItem value="">
+                  <em>Selecciona un sector</em>
+                </MenuItem>
+                {sectors.map((sector) => (
+                  <MenuItem key={sector.id} value={sector.id}>
+                    {sector.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
+          />
+          <Typography color="error">{errors.sector_id?.message}</Typography>
+        </FormControl>
+
+        <FormControl
+          fullWidth
+          margin="normal"
+          error={!!errors.supplier_type_id}
         >
-          {categories.map((category) => (
-            <MenuItem key={category.id} value={category.id}>
-              {category.name}
-            </MenuItem>
-          ))}
-        </Select>
-        {formErrors.category_id && (
-          <Typography color="error">{formErrors.category_id}</Typography>
-        )}
-      </FormControl>
+          <InputLabel>Tipo de Proveedor</InputLabel>
+          <Controller
+            name="supplier_type_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                disabled={isViewMode}
+                value={field.value || ""}
+                onChange={field.onChange}
+              >
+                <MenuItem value="">
+                  <em>Selecciona un tipo</em>
+                </MenuItem>
+                {supplierTypes.map((type) => (
+                  <MenuItem key={type.id} value={type.id}>
+                    {type.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
+          />
+          <Typography color="error">
+            {errors.supplier_type_id?.message}
+          </Typography>
+        </FormControl>
 
-      <FormControl fullWidth margin="normal" error={!!formErrors.sector_id}>
-        <InputLabel>Sector</InputLabel>
-        <Select
-          name="sector_id"
-          value={supplierData.sector_id || ""}
-          onChange={handleSelectChange}
-          disabled={isViewMode}
-        >
-          {sectors.map((sector) => (
-            <MenuItem key={sector.id} value={sector.id}>
-              {sector.name}
-            </MenuItem>
-          ))}
-        </Select>
-        {formErrors.sector_id && (
-          <Typography color="error">{formErrors.sector_id}</Typography>
-        )}
-      </FormControl>
+        <Controller
+          name="address"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Dirección"
+              error={!!errors.address}
+              helperText={errors.address?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
 
-      <FormControl
-        fullWidth
-        margin="normal"
-        error={!!formErrors.supplier_type_id}
-      >
-        <InputLabel>Tipo de Proveedor</InputLabel>
-        <Select
-          name="supplier_type_id"
-          value={supplierData.supplier_type_id || ""}
-          onChange={handleSelectChange}
-          disabled={isViewMode}
-        >
-          {supplierTypes.map((type) => (
-            <MenuItem key={type.id} value={type.id}>
-              {type.name}
-            </MenuItem>
-          ))}
-        </Select>
-        {formErrors.supplier_type_id && (
-          <Typography color="error">{formErrors.supplier_type_id}</Typography>
-        )}
-      </FormControl>
+        <Controller
+          name="phone"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Teléfono"
+              error={!!errors.phone}
+              helperText={errors.phone?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
 
-      <TextField
-        label="Dirección"
-        name="address"
-        margin="normal"
-        value={supplierData.address}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-        error={!!formErrors.address}
-        helperText={formErrors.address}
-      />
-      <TextField
-        label="Teléfono"
-        name="phone"
-        margin="normal"
-        value={supplierData.phone}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-        error={!!formErrors.phone}
-        helperText={formErrors.phone}
-      />
-      <TextField
-        label="Email"
-        name="email"
-        margin="normal"
-        value={supplierData.email}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-        error={!!formErrors.email}
-        helperText={formErrors.email}
-      />
-      <TextField
-        label="Website"
-        name="website"
-        margin="normal"
-        value={supplierData.website}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-        type="url"
-        error={!!formErrors.website}
-        helperText={formErrors.website}
-      />
+        <Controller
+          name="email"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Email"
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
 
-      {!isViewMode && (
-        <div className="flex justify-center">
+        <Controller
+          name="website"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Website"
+              error={!!errors.website}
+              helperText={errors.website?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
+
+        <div className="flex justify-between mt-4">
           <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            className="w-1/2 bg-blue-500 hover:bg-blue-600"
+            variant="outlined"
+            color="secondary"
+            onClick={() => navigate(-1)}
+            className="w-1/3"
           >
-            {mode === "create" ? "Guardar" : "Guardar Cambios"}
+            Volver
           </Button>
+
+          {!isViewMode && (
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className="w-1/2 bg-blue-500 hover:bg-blue-600"
+            >
+              {mode === "create" ? "Guardar" : "Guardar Cambios"}
+            </Button>
+          )}
         </div>
-      )}
+      </form>
     </div>
   );
 };

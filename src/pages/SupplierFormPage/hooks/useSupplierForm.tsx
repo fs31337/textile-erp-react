@@ -7,6 +7,7 @@ import {
   updateSupplier,
 } from "../../../services/Suppliers";
 import { SelectChangeEvent } from "@mui/material";
+import { useNotification } from "../../../context/NotificationProvider/NotificationProvider";
 
 interface UseSupplierFormResult {
   supplierData: Omit<Supplier, "id" | "created_at" | "updated_at">;
@@ -39,7 +40,7 @@ export const useSupplierForm = (
     mode === "edit" || mode === "view"
   );
   const [error, setError] = useState<string | null>(null);
-
+  const { showNotification } = useNotification();
   useEffect(() => {
     if ((mode === "edit" || mode === "view") && id) {
       setLoading(true);
@@ -74,12 +75,24 @@ export const useSupplierForm = (
   const handleSave = () => {
     if (mode === "create") {
       createSupplier(supplierData)
-        .then(() => navigate("/proveedores"))
-        .catch(() => setError("Error al crear el proveedor"));
+        .then(() => {
+          showNotification("Proveedor creado con éxito.", "success");
+          navigate("/proveedores");
+        })
+        .catch(() => {
+          setError("Error al crear el proveedor");
+          showNotification("Error al crear el proveedor.", "error");
+        });
     } else if (mode === "edit" && id) {
       updateSupplier(Number(id), supplierData)
-        .then(() => navigate("/proveedores"))
-        .catch(() => setError("Error al actualizar el proveedor"));
+        .then(() => {
+          showNotification("Proveedor modificado con éxito.", "success");
+          navigate("/proveedores");
+        })
+        .catch(() => {
+          setError("Error al actualizar el proveedor");
+          showNotification("Error al modificar el proveedor.", "error");
+        });
     }
   };
 
