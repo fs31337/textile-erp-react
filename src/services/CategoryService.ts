@@ -5,7 +5,6 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL as string;
 export interface Category {
   id: number;
   name: string;
-  description?: string;
   created_at?: string;
   updated_at?: string;
 }
