@@ -5,8 +5,8 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL as string;
 export interface Purchase {
   id: number;
   supplier_id: number;
-  total_amount: number;
-  status: string;
+  date: string;
+  total: string;
   created_at?: string;
   updated_at?: string;
 }

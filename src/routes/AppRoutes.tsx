@@ -4,6 +4,7 @@ import { contactPersonRoutes } from "./ContactPerson";
 import { supplierRoutes } from "./SupplierRoutes";
 import { RouteType } from "../types/routes";
 import { customerRoutes } from "./CustomerRoutes";
+import { purchasesRoutes } from "./Purchases";
 
 const baseRoutes: RouteType[] = [
   { path: "/", element: <Home /> },
@@ -15,4 +16,5 @@ export const appRoutes: RouteType[] = [
   ...supplierRoutes,
   ...contactPersonRoutes,
   ...customerRoutes,
+  ...purchasesRoutes,
 ];
