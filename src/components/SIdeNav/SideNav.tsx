@@ -169,7 +169,7 @@ export function SideNav({ children }: { children: React.ReactNode }) {
             { text: "Usuarios", icon: <GroupIcon /> },
             { text: "Clientes", icon: <PeopleIcon /> },
             { text: "Categorias", icon: <CategoryIcon /> },
-            { text: "Inventario", icon: <InventoryIcon /> },
+            { text: "Productos Finalizados", icon: <InventoryIcon /> },
             { text: "Compras", icon: <ShoppingCartIcon /> },
             { text: "Ventas", icon: <MonetizationOnIcon /> },
             { text: "Contactos", icon: <PeopleIcon /> },
