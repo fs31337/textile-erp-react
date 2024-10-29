@@ -38,7 +38,7 @@ export const DataTable = <T,>({
   onViewDetails,
   onDelete,
 }: DataTableProps<T>) => {
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState<T | null>(null);
 
   const handleDeleteClick = (item: T) => {
@@ -49,8 +49,9 @@ export const DataTable = <T,>({
   const confirmDelete = () => {
     if (selectedItem && onDelete) {
       onDelete(selectedItem);
-      setOpenDialog(false);
     }
+    setOpenDialog(false);
+    setSelectedItem(null);
   };
 
   if (isLoading) return <CircularProgress />;
@@ -63,10 +64,7 @@ export const DataTable = <T,>({
           <TableHead>
             <TableRow>
               {columns.map((column) => (
-                <TableCell
-                  key={column.label}
-                  align={column.accessor === "id" ? "center" : "left"}
-                >
+                <TableCell key={column.label} align="center">
                   {column.label}
                 </TableCell>
               ))}
@@ -77,10 +75,7 @@ export const DataTable = <T,>({
             {data.map((row, rowIndex) => (
               <TableRow key={rowIndex}>
                 {columns.map((column) => (
-                  <TableCell
-                    key={column.label}
-                    align={column.accessor === "id" ? "center" : "left"}
-                  >
+                  <TableCell key={column.label} align="center">
                     {row[column.accessor] as React.ReactNode}
                   </TableCell>
                 ))}
