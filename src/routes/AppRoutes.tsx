@@ -8,6 +8,8 @@ import { purchasesRoutes } from "./Purchases";
 import { categoriesRoutes } from "./Categories";
 import { userRoutes } from "./Users";
 import { finishedProductsRoutes } from "./FinishedProducts";
+import { qrScanRoutes } from "./QRScan";
+import { salesOrderRoutes } from "./SalesOrder";
 
 const baseRoutes: RouteType[] = [
   { path: "/", element: <Home /> },
@@ -23,4 +25,6 @@ export const appRoutes: RouteType[] = [
   ...categoriesRoutes,
   ...userRoutes,
   ...finishedProductsRoutes,
+  ...qrScanRoutes,
+  ...salesOrderRoutes,
 ];
