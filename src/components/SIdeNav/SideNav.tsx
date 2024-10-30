@@ -30,6 +30,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import BusinessIcon from "@mui/icons-material/Business";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import { Link } from "react-router-dom";
 
 const drawerWidth = 240;
@@ -231,14 +232,15 @@ export function SideNav({ children }: { children: React.ReactNode }) {
         <Divider />
         <List>
           {[
+            { text: "Lector QR", icon: <QrCodeScannerIcon /> },
             { text: "Perfil", icon: <AccountCircleIcon /> },
             { text: "Configuración", icon: <SettingsIcon /> },
             { text: "Logout", icon: <ExitToAppIcon /> },
           ].map(({ text, icon }) => (
             <ListItem key={text} disablePadding sx={{ display: "block" }}>
               <ListItemButton
-                component={Link} // Hacemos que el ListItemButton sea un enlace
-                to={`/${text.toLowerCase()}`} // Generamos la ruta basada en el nombre
+                component={Link}
+                to={`/${text.toLowerCase().replace(/\s+/g, "-")}`}
                 sx={[
                   {
                     minHeight: 48,
