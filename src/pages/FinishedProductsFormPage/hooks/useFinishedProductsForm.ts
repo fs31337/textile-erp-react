@@ -9,13 +9,7 @@ import {
   getFinishedProductById,
   updateFinishedProduct,
 } from "../../../services/FinishedProductService";
-
-export interface FinishedProductData {
-  name: string;
-  description?: string;
-  price: number;
-  current_stock: number;
-}
+import { FinishedProductData } from "../types";
 
 export const useFinishedProductForm = (mode: "create" | "edit" | "view") => {
   const navigate = useNavigate();

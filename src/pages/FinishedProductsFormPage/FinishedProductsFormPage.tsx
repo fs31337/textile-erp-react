@@ -3,10 +3,11 @@ import { TextField, Button, Typography, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Controller } from "react-hook-form";
 import { useFinishedProductForm } from "./hooks/useFinishedProductsForm";
+import { FinishedOrderFormPageProps } from "./types";
 
-export const FinishedProductFormPage: React.FC<{
-  mode: "create" | "edit" | "view";
-}> = ({ mode }) => {
+export const FinishedProductFormPage: React.FC<FinishedOrderFormPageProps> = ({
+  mode,
+}) => {
   const navigate = useNavigate();
   const { control, handleSubmit, errors, isLoading, isViewMode, onSubmit } =
     useFinishedProductForm(mode);

@@ -3,10 +3,9 @@ import { TextField, Button, Typography, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Controller } from "react-hook-form";
 import { useUserForm } from "./hooks/useUsersForm";
+import { UserFormPageProps } from "./types";
 
-export const UserFormPage: React.FC<{ mode: "create" | "edit" | "view" }> = ({
-  mode,
-}) => {
+export const UserFormPage: React.FC<UserFormPageProps> = ({ mode }) => {
   const navigate = useNavigate();
   const { control, handleSubmit, errors, isLoading, isViewMode, onSubmit } =
     useUserForm(mode);
