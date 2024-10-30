@@ -12,7 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ConfirmationDialog from "./components/ConfirmationDialog";
+import { ConfirmationDialog } from "./components/ConfirmationDialog";
 
 interface Column<T> {
   label: string;

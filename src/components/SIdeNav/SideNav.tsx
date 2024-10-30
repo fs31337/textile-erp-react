@@ -175,7 +175,7 @@ export function SideNav({ children }: { children: React.ReactNode }) {
             { text: "Ventas", icon: <MonetizationOnIcon /> },
             { text: "Contactos", icon: <PeopleIcon /> },
             { text: "Puntos de venta", icon: <PointOfSaleIcon /> },
-            { text: "Manufactura", icon: <BuildIcon /> },
+            { text: "Materiales", icon: <BuildIcon /> },
             { text: "Reportes", icon: <AssessmentIcon /> },
           ].map(({ text, icon }) => (
             <ListItem key={text} disablePadding sx={{ display: "block" }}>

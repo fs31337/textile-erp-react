@@ -10,6 +10,7 @@ import { finishedProductsRoutes } from "./FinishedProducts";
 import { qrScanRoutes } from "./QRScan";
 import { salesOrderRoutes } from "./SalesOrder";
 import { DashboardPage } from "../pages/DashBoard";
+import { materialsRoutes } from "./Materials";
 
 const baseRoutes: RouteType[] = [
   { path: "/", element: <DashboardPage /> },
@@ -28,4 +29,5 @@ export const appRoutes: RouteType[] = [
   ...finishedProductsRoutes,
   ...qrScanRoutes,
   ...salesOrderRoutes,
+  ...materialsRoutes,
 ];
