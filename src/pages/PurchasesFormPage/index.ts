@@ -1,0 +1,1 @@
+export { PurchaseFormPage } from "./PurchasesFormPage";

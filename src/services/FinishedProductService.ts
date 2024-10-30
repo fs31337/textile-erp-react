@@ -7,6 +7,7 @@ export interface FinishedProduct {
   name: string;
   description?: string;
   price: number;
+  current_stock: number;
   created_at?: string;
   updated_at?: string;
 }
