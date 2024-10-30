@@ -77,5 +77,3 @@ export const PurchaseList: React.FC = () => {
     </div>
   );
 };
-
-export default PurchaseList;

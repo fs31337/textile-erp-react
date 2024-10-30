@@ -1,6 +1,6 @@
 import React from "react";
 import { Typography } from "@mui/material";
-import PurchaseList from "./components/PurchaseList";
+import { PurchaseList } from "./components/PurchaseList";
 
 export const Purchases: React.FC = () => {
   return (
