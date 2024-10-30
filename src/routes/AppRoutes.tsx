@@ -1,4 +1,3 @@
-import { Home } from "../pages/Home";
 import { Settings } from "../pages/Settings";
 import { contactPersonRoutes } from "./ContactPerson";
 import { supplierRoutes } from "./SupplierRoutes";
@@ -10,9 +9,11 @@ import { userRoutes } from "./Users";
 import { finishedProductsRoutes } from "./FinishedProducts";
 import { qrScanRoutes } from "./QRScan";
 import { salesOrderRoutes } from "./SalesOrder";
+import { DashboardPage } from "../pages/DashBoard";
 
 const baseRoutes: RouteType[] = [
-  { path: "/", element: <Home /> },
+  { path: "/", element: <DashboardPage /> },
+  { path: "/dashboard", element: <DashboardPage /> },
   { path: "/settings", element: <Settings /> },
 ];
 
