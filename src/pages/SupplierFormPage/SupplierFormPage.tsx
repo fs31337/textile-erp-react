@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import {
   TextField,
   Button,
@@ -9,52 +9,40 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
-import { useSupplierForm } from "./hooks/useSupplierForm";
-import {
-  getSupplierTypes,
-  SupplierType,
-} from "../../services/SupplierTypeService";
-import { getSectors, Sector } from "../../services/SectorService";
-import { Category, getCategories } from "../../services/CategoryService";
 
-interface SupplierFormPageProps {
-  mode: "create" | "edit" | "view";
-}
+import { useNavigate } from "react-router-dom";
+
+import { SupplierFormPageProps } from "./types";
+import { useSupplierForm } from "./hooks/useSupplierForm";
+import { Controller } from "react-hook-form";
 
 export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
+  const navigate = useNavigate();
   const {
-    supplierData,
-    loading,
+    control,
+    handleSubmit,
+    errors,
+    isLoading,
+    loadingData,
     error,
-    handleInputChange,
-    handleSelectChange,
-    handleSave,
+    categories,
+    sectors,
+    supplierTypes,
     isViewMode,
+    onSubmit,
   } = useSupplierForm(mode);
 
-  const [supplierTypes, setSupplierTypes] = useState<SupplierType[]>([]);
-  const [sectors, setSectors] = useState<Sector[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  if (isLoading || loadingData) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <CircularProgress />
+      </div>
+    );
+  }
 
-  const fetchData = useCallback(async () => {
-    try {
-      const [supplierTypesData, sectorsData, categoriesData] =
-        await Promise.all([getSupplierTypes(), getSectors(), getCategories()]);
-      console.log(supplierTypesData, sectorsData, categoriesData);
-      setSupplierTypes(supplierTypesData);
-      setSectors(sectorsData);
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error("Error fetching data", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
 
   return (
     <div className="mt-6 max-w-lg mx-auto flex flex-col space-y-4 p-4 bg-white shadow-md rounded-md">
@@ -66,113 +54,193 @@ export const SupplierFormPage: React.FC<SupplierFormPageProps> = ({ mode }) => {
           : "Detalles del Proveedor"}
       </Typography>
 
-      <TextField
-        label="Nombre"
-        name="name"
-        margin="normal"
-        value={supplierData.name}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-      />
+      <form onSubmit={handleSubmit(onSubmit)} className="form-container">
+        <Controller
+          name="name"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Nombre"
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Categoría</InputLabel>
-        <Select
-          name="category_id"
-          value={supplierData.category_id || ""}
-          onChange={handleSelectChange}
-          disabled={isViewMode}
+        <FormControl fullWidth margin="normal" error={!!errors.category_id}>
+          <InputLabel>Categoría</InputLabel>
+          <Controller
+            name="category_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                disabled={isViewMode}
+                value={field.value || ""}
+                onChange={field.onChange}
+              >
+                <MenuItem value="">
+                  <em>Selecciona una categoría</em>
+                </MenuItem>
+                {categories.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
+          />
+          <Typography color="error">{errors.category_id?.message}</Typography>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal" error={!!errors.sector_id}>
+          <InputLabel>Sector</InputLabel>
+          <Controller
+            name="sector_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                disabled={isViewMode}
+                value={field.value || ""}
+                onChange={field.onChange}
+              >
+                <MenuItem value="">
+                  <em>Selecciona un sector</em>
+                </MenuItem>
+                {sectors.map((sector) => (
+                  <MenuItem key={sector.id} value={sector.id}>
+                    {sector.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
+          />
+          <Typography color="error">{errors.sector_id?.message}</Typography>
+        </FormControl>
+
+        <FormControl
+          fullWidth
+          margin="normal"
+          error={!!errors.supplier_type_id}
         >
-          {categories.map((category) => (
-            <MenuItem key={category.id} value={category.id}>
-              {category.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+          <InputLabel>Tipo de Proveedor</InputLabel>
+          <Controller
+            name="supplier_type_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                disabled={isViewMode}
+                value={field.value || ""}
+                onChange={field.onChange}
+              >
+                <MenuItem value="">
+                  <em>Selecciona un tipo</em>
+                </MenuItem>
+                {supplierTypes.map((type) => (
+                  <MenuItem key={type.id} value={type.id}>
+                    {type.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
+          />
+          <Typography color="error">
+            {errors.supplier_type_id?.message}
+          </Typography>
+        </FormControl>
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Sector</InputLabel>
-        <Select
-          name="sector_id"
-          value={supplierData.sector_id || ""}
-          onChange={handleSelectChange}
-          disabled={isViewMode}
-        >
-          {sectors.map((sector) => (
-            <MenuItem key={sector.id} value={sector.id}>
-              {sector.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+        <Controller
+          name="address"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Dirección"
+              error={!!errors.address}
+              helperText={errors.address?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Tipo de Proveedor</InputLabel>
-        <Select
-          name="supplier_type_id"
-          value={supplierData.supplier_type_id || ""}
-          onChange={handleSelectChange}
-          disabled={isViewMode}
-        >
-          {supplierTypes.map((type) => (
-            <MenuItem key={type.id} value={type.id}>
-              {type.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+        <Controller
+          name="phone"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Teléfono"
+              error={!!errors.phone}
+              helperText={errors.phone?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
 
-      <TextField
-        label="Dirección"
-        name="address"
-        margin="normal"
-        value={supplierData.address}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-      />
-      <TextField
-        label="Teléfono"
-        name="phone"
-        margin="normal"
-        value={supplierData.phone}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-      />
-      <TextField
-        label="Email"
-        name="email"
-        margin="normal"
-        value={supplierData.email}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-      />
-      <TextField
-        label="Website"
-        name="website"
-        margin="normal"
-        value={supplierData.website}
-        onChange={handleInputChange}
-        disabled={isViewMode}
-        fullWidth
-      />
+        <Controller
+          name="email"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Email"
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
 
-      {!isViewMode && (
-        <div className="flex justify-center">
+        <Controller
+          name="website"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Website"
+              error={!!errors.website}
+              helperText={errors.website?.message}
+              fullWidth
+              disabled={isViewMode}
+              margin="normal"
+            />
+          )}
+        />
+
+        <div className="flex justify-between mt-4">
           <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSave}
-            className="w-1/2 bg-blue-500 hover:bg-blue-600"
+            variant="outlined"
+            color="secondary"
+            onClick={() => navigate(-1)}
+            className="w-1/3"
           >
-            {mode === "create" ? "Guardar" : "Guardar Cambios"}
+            Volver
           </Button>
+
+          {!isViewMode && (
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className="w-1/2 bg-blue-500 hover:bg-blue-600"
+            >
+              {mode === "create" ? "Guardar" : "Guardar Cambios"}
+            </Button>
+          )}
         </div>
-      )}
+      </form>
     </div>
   );
 };

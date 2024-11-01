@@ -6,7 +6,9 @@ export interface Material {
   id: number;
   name: string;
   description?: string;
-  quantity: number;
+  current_stock: number;
+  unit_of_measure: string;
+  cost: number;
   created_at?: string;
   updated_at?: string;
 }
