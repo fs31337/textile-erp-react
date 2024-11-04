@@ -12,6 +12,7 @@ interface ConfirmationDialogProps {
   description: string;
   onConfirm: () => void;
   onCancel: () => void;
+  confirmText?: string;
 }
 
 export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
@@ -20,6 +21,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   description,
   onConfirm,
   onCancel,
+  confirmText = "Eliminar",
 }) => {
   return (
     <Dialog open={open} onClose={onCancel}>
@@ -30,7 +32,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       <DialogActions>
         <Button onClick={onCancel}>Cancelar</Button>
         <Button color="error" onClick={onConfirm}>
-          Eliminar
+          {confirmText}
         </Button>
       </DialogActions>
     </Dialog>

@@ -100,5 +100,6 @@ export const useContactsForm = (mode: "create" | "edit" | "view") => {
     isViewMode: mode === "view",
     onSubmit,
     suppliers,
+    isDirty,
   };
 };

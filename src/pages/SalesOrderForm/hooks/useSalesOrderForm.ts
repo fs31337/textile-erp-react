@@ -77,5 +77,6 @@ export const useSalesOrderForm = (mode: "create" | "edit" | "view") => {
     isLoading,
     isViewMode: mode === "view",
     onSubmit,
+    isDirty,
   };
 };

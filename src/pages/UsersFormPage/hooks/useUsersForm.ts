@@ -83,5 +83,6 @@ export const useUserForm = (mode: "create" | "edit" | "view") => {
     isLoading,
     isViewMode: mode === "view",
     onSubmit,
+    isDirty,
   };
 };

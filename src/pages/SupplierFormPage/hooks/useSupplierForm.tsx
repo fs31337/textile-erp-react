@@ -100,5 +100,6 @@ export const useSupplierForm = (mode: "create" | "edit" | "view") => {
     supplierTypes,
     isViewMode: mode === "view",
     onSubmit,
+    isDirty,
   };
 };

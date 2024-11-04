@@ -83,5 +83,6 @@ export const useCustomerForm = (mode: "create" | "edit" | "view") => {
     isLoading,
     isViewMode,
     onSubmit,
+    isDirty,
   };
 };

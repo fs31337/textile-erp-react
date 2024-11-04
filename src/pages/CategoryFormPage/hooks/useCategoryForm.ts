@@ -86,5 +86,6 @@ export const useCategoryForm = (mode: "create" | "edit" | "view") => {
     isLoading,
     isViewMode: mode === "view",
     onSubmit,
+    isDirty,
   };
 };

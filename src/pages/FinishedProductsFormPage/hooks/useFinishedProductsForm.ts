@@ -84,5 +84,6 @@ export const useFinishedProductForm = (mode: "create" | "edit" | "view") => {
     isLoading,
     isViewMode: mode === "view",
     onSubmit,
+    isDirty,
   };
 };

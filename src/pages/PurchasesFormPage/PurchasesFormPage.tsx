@@ -1,18 +1,17 @@
 import React from "react";
 import {
   TextField,
-  Button,
-  Typography,
   CircularProgress,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
+  Typography,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { PurchaseFormPageProps } from "./types";
 import { usePurchaseForm } from "./hooks/usePurchaseForm";
-
+import { FormContainer } from "../../components/FormContainer";
 export const PurchaseFormPage: React.FC<PurchaseFormPageProps> = ({ mode }) => {
   const {
     control,
@@ -22,6 +21,7 @@ export const PurchaseFormPage: React.FC<PurchaseFormPageProps> = ({ mode }) => {
     suppliers,
     isViewMode,
     onSubmit,
+    isDirty,
   } = usePurchaseForm(mode);
 
   if (isLoading) {
@@ -32,17 +32,21 @@ export const PurchaseFormPage: React.FC<PurchaseFormPageProps> = ({ mode }) => {
     );
   }
 
-  return (
-    <div className="mt-6 max-w-lg mx-auto flex flex-col space-y-4 p-4 bg-white shadow-md rounded-md">
-      <Typography variant="h4" className="text-gray-800 mb-4">
-        {mode === "create"
-          ? "Crear Compra"
-          : mode === "edit"
-          ? "Editar Compra"
-          : "Detalles de la Compra"}
-      </Typography>
+  const title =
+    mode === "create"
+      ? "Crear Compra"
+      : mode === "edit"
+      ? "Editar Compra"
+      : "Detalles de la Compra";
 
-      <form onSubmit={handleSubmit(onSubmit)} className="form-container">
+  return (
+    <FormContainer
+      title={title}
+      isViewMode={isViewMode}
+      onSave={handleSubmit(onSubmit)}
+      isDirty={isDirty}
+    >
+      <form className="form-container">
         <FormControl fullWidth margin="normal" error={!!errors.supplier_id}>
           <InputLabel>Proveedor</InputLabel>
           <Controller
@@ -100,29 +104,7 @@ export const PurchaseFormPage: React.FC<PurchaseFormPageProps> = ({ mode }) => {
             />
           )}
         />
-
-        <div className="flex justify-between mt-4">
-          <Button
-            variant="outlined"
-            color="secondary"
-            className="w-1/3"
-            onClick={() => window.history.back()}
-          >
-            Volver
-          </Button>
-
-          {!isViewMode && (
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className="w-1/2 bg-blue-500 hover:bg-blue-600"
-            >
-              {mode === "create" ? "Guardar" : "Guardar Cambios"}
-            </Button>
-          )}
-        </div>
       </form>
-    </div>
+    </FormContainer>
   );
 };

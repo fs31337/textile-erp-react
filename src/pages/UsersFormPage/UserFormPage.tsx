@@ -1,12 +1,12 @@
+// UserFormPage.tsx
 import React from "react";
-import { TextField, Button, Typography, CircularProgress } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { TextField, CircularProgress } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { useUserForm } from "./hooks/useUsersForm";
 import { UserFormPageProps } from "./types";
+import { FormContainer } from "../../components/FormContainer";
 
 export const UserFormPage: React.FC<UserFormPageProps> = ({ mode }) => {
-  const navigate = useNavigate();
   const { control, handleSubmit, errors, isLoading, isViewMode, onSubmit } =
     useUserForm(mode);
 
@@ -18,17 +18,21 @@ export const UserFormPage: React.FC<UserFormPageProps> = ({ mode }) => {
     );
   }
 
-  return (
-    <div className="mt-6 max-w-lg mx-auto flex flex-col space-y-4 p-4 bg-white shadow-md rounded-md">
-      <Typography variant="h4" className="text-gray-800 mb-4">
-        {mode === "create"
-          ? "Crear Usuario"
-          : mode === "edit"
-          ? "Editar Usuario"
-          : "Detalles del Usuario"}
-      </Typography>
+  const title =
+    mode === "create"
+      ? "Crear Usuario"
+      : mode === "edit"
+      ? "Editar Usuario"
+      : "Detalles del Usuario";
 
-      <form onSubmit={handleSubmit(onSubmit)} className="form-container">
+  return (
+    <FormContainer
+      title={title}
+      isViewMode={isViewMode}
+      onSave={handleSubmit(onSubmit)}
+      isDirty
+    >
+      <form className="form-container">
         <Controller
           name="name"
           control={control}
@@ -78,29 +82,7 @@ export const UserFormPage: React.FC<UserFormPageProps> = ({ mode }) => {
             )}
           />
         )}
-
-        <div className="flex justify-between mt-4">
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => navigate(-1)}
-            className="w-1/3"
-          >
-            Volver
-          </Button>
-
-          {!isViewMode && (
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className="w-1/2 bg-blue-500 hover:bg-blue-600"
-            >
-              {mode === "create" ? "Guardar" : "Guardar Cambios"}
-            </Button>
-          )}
-        </div>
       </form>
-    </div>
+    </FormContainer>
   );
 };

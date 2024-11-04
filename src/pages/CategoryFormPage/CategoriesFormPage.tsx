@@ -1,16 +1,22 @@
 import React from "react";
-import { TextField, Button, Typography, CircularProgress } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { TextField, CircularProgress } from "@mui/material";
 import { CategoriesFormPageProps } from "./types";
 import { useCategoryForm } from "./hooks/useCategoryForm";
 import { Controller } from "react-hook-form";
+import { FormContainer } from "../../components/FormContainer";
 
 export const CategoryFormPage: React.FC<CategoriesFormPageProps> = ({
   mode,
 }) => {
-  const navigate = useNavigate();
-  const { control, handleSubmit, errors, isLoading, isViewMode, onSubmit } =
-    useCategoryForm(mode);
+  const {
+    control,
+    handleSubmit,
+    errors,
+    isLoading,
+    isViewMode,
+    onSubmit,
+    isDirty,
+  } = useCategoryForm(mode);
 
   if (isLoading) {
     return (
@@ -20,17 +26,21 @@ export const CategoryFormPage: React.FC<CategoriesFormPageProps> = ({
     );
   }
 
-  return (
-    <div className="mt-6 max-w-lg mx-auto flex flex-col space-y-4 p-4 bg-white shadow-md rounded-md">
-      <Typography variant="h4" className="text-gray-800 mb-4">
-        {mode === "create"
-          ? "Crear Categoría"
-          : mode === "edit"
-          ? "Editar Categoría"
-          : "Detalles de la Categoría"}
-      </Typography>
+  const title =
+    mode === "create"
+      ? "Crear Categoría"
+      : mode === "edit"
+      ? "Editar Categoría"
+      : "Detalles de la Categoría";
 
-      <form onSubmit={handleSubmit(onSubmit)} className="form-container">
+  return (
+    <FormContainer
+      title={title}
+      isViewMode={isViewMode}
+      onSave={handleSubmit(onSubmit)}
+      isDirty={isDirty}
+    >
+      <form className="form-container">
         <Controller
           name="name"
           control={control}
@@ -46,29 +56,7 @@ export const CategoryFormPage: React.FC<CategoriesFormPageProps> = ({
             />
           )}
         />
-
-        <div className="flex justify-between mt-4">
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => navigate(-1)}
-            className="w-1/3"
-          >
-            Volver
-          </Button>
-
-          {!isViewMode && (
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className="w-1/2 bg-blue-500 hover:bg-blue-600"
-            >
-              {mode === "create" ? "Guardar" : "Guardar Cambios"}
-            </Button>
-          )}
-        </div>
       </form>
-    </div>
+    </FormContainer>
   );
 };
